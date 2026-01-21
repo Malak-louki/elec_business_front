@@ -28,6 +28,32 @@ export const routes: Routes = [
       .then(m => m.EmailValidationComponent)
   },
   {
+    path: 'stations',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/stations/station-list/station-list.component')
+          .then(m => m.StationListComponent)
+      },
+      {
+        path: 'new',
+        loadComponent: () => import('./features/stations/station-form/station-form.component')
+          .then(m => m.StationFormComponent)
+      },
+      {
+        path: ':id',
+        loadComponent: () => import('./features/stations/station-detail/station-detail.component')
+          .then(m => m.StationDetailComponent)
+      },
+      {
+        path: ':id/edit',
+        loadComponent: () => import('./features/stations/station-form/station-form.component')
+          .then(m => m.StationFormComponent)
+      }
+    ]
+  },
+  {
     path: '**',
     redirectTo: '/home'
   }
