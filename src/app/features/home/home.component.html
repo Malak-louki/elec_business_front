@@ -13,31 +13,18 @@
       </p>
 
       <div class="flex justify-center space-x-4">
-        <!-- Utilisateur NON connecté -->
-        <ng-container *ngIf="!authService.isAuthenticated(); else loggedInActions">
-          <a
-            routerLink="/register"
-            class="px-8 py-3 bg-primary text-white text-lg font-semibold rounded-lg hover:bg-primary-dark transition shadow-lg"
-          >
+        @if (!authService.isAuthenticated()) {
+          <a routerLink="/register" class="px-8 py-3 bg-primary text-white text-lg font-semibold rounded-lg hover:bg-primary-dark transition shadow-lg">
             Commencer maintenant
           </a>
-          <a
-            routerLink="/login"
-            class="px-8 py-3 bg-white text-primary text-lg font-semibold rounded-lg hover:bg-gray-50 transition shadow-lg border-2 border-primary"
-          >
+          <a routerLink="/login" class="px-8 py-3 bg-white text-primary text-lg font-semibold rounded-lg hover:bg-gray-50 transition shadow-lg border-2 border-primary">
             Se connecter
           </a>
-        </ng-container>
-
-        <!-- Utilisateur connecté -->
-        <ng-template #loggedInActions>
-          <a
-            routerLink="/dashboard"
-            class="px-8 py-3 bg-primary text-white text-lg font-semibold rounded-lg hover:bg-primary-dark transition shadow-lg"
-          >
-            Accéder au tableau de bord
+        } @else {
+          <a routerLink="/stations" class="px-8 py-3 bg-primary text-white text-lg font-semibold rounded-lg hover:bg-primary-dark transition shadow-lg">
+            Accéder aux bornes
           </a>
-        </ng-template>
+        }
       </div>
     </div>
 
