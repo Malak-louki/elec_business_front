@@ -1,0 +1,160 @@
+<app-navbar></app-navbar>
+
+<div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 py-8">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Bouton retour -->
+    <div class="mb-6">
+      <a [routerLink]="station ? ['/stations', station.id] : ['/stations']" class="inline-flex items-center text-gray-600 hover:text-gray-900 transition">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Retour
+      </a>
+    </div>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-gray-900">Réserver une borne</h1>
+      @if (station) {
+        <p class="text-gray-600 mt-2">{{ station.name }} - {{ station.address.city }}</p>
+      }
+    </div>
+
+    @if (isLoading && !station) {
+      <div class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    }
+
+    @if (!isLoading && station) {
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Informations de la station -->
+        <div class="bg-white rounded-2xl shadow-xl p-6">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Informations</h2>
+          
+          <div class="space-y-4">
+            <div class="flex items-center">
+              <span class="text-2xl mr-3">⚡</span>
+              <div>
+                <p class="text-sm text-gray-500">Puissance</p>
+                <p class="font-semibold">{{ station.chargingPower || station.chargingPowerKw + ' kW' }}</p>
+              </div>
+            </div>
+
+            <div class="flex items-center">
+              <span class="text-2xl mr-3">💰</span>
+              <div>
+                <p class="text-sm text-gray-500">Tarif</p>
+                <p class="font-semibold text-primary">{{ station.hourlyPrice }}€ / heure</p>
+              </div>
+            </div>
+
+            <div class="flex items-center">
+              <span class="text-2xl mr-3">📍</span>
+              <div>
+                <p class="text-sm text-gray-500">Adresse</p>
+                <p class="font-semibold">{{ station.address.street }}, {{ station.address.city }}</p>
+              </div>
+            </div>
+          </div>
+
+          @if (estimatedAmount > 0) {
+            <div class="mt-6 p-4 bg-primary-light rounded-lg">
+              <p class="text-sm text-gray-700 mb-1">Montant estimé</p>
+              <p class="text-3xl font-bold text-primary">{{ estimatedAmount }}€</p>
+              <p class="text-xs text-gray-600 mt-1">
+                Durée : {{ bookingService.calculateDuration(bookingForm.value.startDateTime, bookingForm.value.endDateTime) }}h
+              </p>
+            </div>
+          }
+        </div>
+
+        <!-- Formulaire de réservation -->
+        <div class="bg-white rounded-2xl shadow-xl p-6">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Réservation</h2>
+
+          @if (errorMessage) {
+            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p class="text-red-600 text-sm">{{ errorMessage }}</p>
+            </div>
+          }
+
+          @if (successMessage) {
+            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <p class="text-green-600 text-sm">{{ successMessage }}</p>
+            </div>
+          }
+
+          <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+            <!-- Date/heure de début -->
+            <div class="mb-6">
+              <label for="startDateTime" class="block text-sm font-medium text-gray-700 mb-2">
+                Date et heure de début *
+              </label>
+              <input type="datetime-local" id="startDateTime" formControlName="startDateTime" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"/>
+              @if (startDateTime?.invalid && startDateTime?.touched) {
+                <p class="mt-1 text-sm text-red-600">
+                  @if (startDateTime?.errors?.['required']) {
+                    La date de début est requise
+                  }
+                  @if (startDateTime?.errors?.['minDate']) {
+                    La date doit être dans le futur
+                  }
+                </p>
+              }
+            </div>
+
+            <!-- Date/heure de fin -->
+            <div class="mb-6">
+              <label for="endDateTime" class="block text-sm font-medium text-gray-700 mb-2">
+                Date et heure de fin *
+              </label>
+              <input type="datetime-local" id="endDateTime" formControlName="endDateTime" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"/>
+              @if (endDateTime?.invalid && endDateTime?.touched) {
+                <p class="mt-1 text-sm text-red-600">
+                  La date de fin est requise
+                </p>
+              }
+              @if (bookingForm.errors?.['dateRange']) {
+                <p class="mt-1 text-sm text-red-600">
+                  La date de fin doit être après la date de début
+                </p>
+              }
+            </div>
+
+            <!-- Bouton vérifier disponibilité -->
+            <button type="button" (click)="checkAvailability()" [disabled]="bookingForm.invalid || isCheckingAvailability" class="w-full mb-4 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
+              @if (isCheckingAvailability) {
+                <span>Vérification...</span>
+              } @else {
+                <span>🔍 Vérifier la disponibilité</span>
+              }
+            </button>
+
+            <!-- Bouton réserver -->
+            <button type="submit" [disabled]="isLoading || !isAvailable || bookingForm.invalid" class="w-full py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition disabled:opacity-50 disabled:cursor-not-allowed">
+              @if (isLoading) {
+                <span>Réservation en cours...</span>
+              } @else {
+                <span>💳 Réserver et payer</span>
+              }
+            </button>
+          </form>
+
+          <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex">
+              <svg class="w-5 h-5 text-blue-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <div>
+                <p class="text-sm text-blue-800">
+                  Vérifiez d'abord la disponibilité avant de réserver. Le paiement sera effectué après confirmation de la disponibilité.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

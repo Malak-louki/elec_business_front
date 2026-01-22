@@ -4,8 +4,7 @@
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Bouton retour -->
     <div class="mb-6">
-      <a routerLink="/stations" 
-         class="inline-flex items-center text-gray-600 hover:text-gray-900 transition">
+      <a routerLink="/stations" class="inline-flex items-center text-gray-600 hover:text-gray-900 transition">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
@@ -30,15 +29,17 @@
     <!-- Détails de la station -->
     @if (!isLoading && station) {
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-        <!-- Header avec badge statut -->
+        <!-- Header -->
         <div class="bg-gradient-to-r from-primary to-primary-dark p-8 text-white">
           <div class="flex justify-between items-start">
             <div>
               <h1 class="text-3xl font-bold mb-2">{{ station.name }}</h1>
-              <p class="text-green-100">{{ station.address }}, {{ station.postalCode }} {{ station.city }}</p>
+              <p class="text-green-100">
+                {{ station.address.street }}, {{ station.address.postalCode }} {{ station.address.city }}
+              </p>
             </div>
-            <span [class]="'px-4 py-2 rounded-full text-sm font-semibold ' + getStatusColor(station.stationStatus)">
-              {{ getStatusText(station.stationStatus) }}
+            <span [ngClass]="'px-4 py-2 rounded-full text-sm font-semibold ' + (station.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')">
+              {{ station.available ? 'Disponible' : 'Occupée' }}
             </span>
           </div>
         </div>
@@ -46,30 +47,19 @@
         <!-- Contenu principal -->
         <div class="p-8">
           <div class="grid md:grid-cols-2 gap-8">
-            <!-- Colonne gauche : Caractéristiques techniques -->
+            <!-- Colonne gauche : Caractéristiques -->
             <div>
               <h2 class="text-2xl font-bold text-gray-900 mb-6">Caractéristiques</h2>
               
               <div class="space-y-4">
-                <!-- Type de courant -->
+                <!-- Puissance -->
                 <div class="flex items-start">
                   <div class="flex-shrink-0 w-12 h-12 bg-primary-light rounded-lg flex items-center justify-center">
                     <span class="text-2xl">⚡</span>
                   </div>
                   <div class="ml-4">
-                    <p class="text-sm text-gray-500">Type de courant</p>
-                    <p class="text-lg font-semibold text-gray-900">{{ getPowerTypeText(station.powerType) }}</p>
-                  </div>
-                </div>
-
-                <!-- Puissance -->
-                <div class="flex items-start">
-                  <div class="flex-shrink-0 w-12 h-12 bg-primary-light rounded-lg flex items-center justify-center">
-                    <span class="text-2xl">🔋</span>
-                  </div>
-                  <div class="ml-4">
-                    <p class="text-sm text-gray-500">Puissance maximale</p>
-                    <p class="text-lg font-semibold text-gray-900">{{ station.maxPower }} kW</p>
+                    <p class="text-sm text-gray-500">Puissance</p>
+                    <p class="text-lg font-semibold text-gray-900">{{ station.chargingPower || station.chargingPowerKw + ' kW' }}</p>
                   </div>
                 </div>
 
@@ -80,24 +70,41 @@
                   </div>
                   <div class="ml-4">
                     <p class="text-sm text-gray-500">Tarif horaire</p>
-                    <p class="text-lg font-semibold text-primary">{{ station.pricePerHour }}€ / heure</p>
+                    <p class="text-lg font-semibold text-primary">{{ station.hourlyPrice }}€ / heure</p>
                   </div>
                 </div>
 
+                <!-- Support -->
+                @if (station.hasStand !== undefined) {
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0 w-12 h-12 bg-primary-light rounded-lg flex items-center justify-center">
+                      <span class="text-2xl">🔌</span>
+                    </div>
+                    <div class="ml-4">
+                      <p class="text-sm text-gray-500">Support</p>
+                      <p class="text-lg font-semibold text-gray-900">{{ station.hasStand ? 'Avec support' : 'Sans support' }}</p>
+                    </div>
+                  </div>
+                }
+
                 <!-- Propriétaire -->
-                <div class="flex items-start">
-                  <div class="flex-shrink-0 w-12 h-12 bg-primary-light rounded-lg flex items-center justify-center">
-                    <span class="text-2xl">👤</span>
+                @if (station.owner) {
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0 w-12 h-12 bg-primary-light rounded-lg flex items-center justify-center">
+                      <span class="text-2xl">👤</span>
+                    </div>
+                    <div class="ml-4">
+                      <p class="text-sm text-gray-500">Propriétaire</p>
+                      <p class="text-lg font-semibold text-gray-900">
+                        {{ station.owner.firstName }} {{ station.owner.lastName }}
+                      </p>
+                    </div>
                   </div>
-                  <div class="ml-4">
-                    <p class="text-sm text-gray-500">Propriétaire</p>
-                    <p class="text-lg font-semibold text-gray-900">{{ station.ownerName }}</p>
-                  </div>
-                </div>
+                }
               </div>
             </div>
 
-            <!-- Colonne droite : Localisation et description -->
+            <!-- Colonne droite : Localisation -->
             <div>
               <h2 class="text-2xl font-bold text-gray-900 mb-6">Localisation</h2>
               
@@ -108,16 +115,16 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                   </svg>
-                  <p class="text-gray-600">Latitude: {{ station.latitude }}</p>
-                  <p class="text-gray-600">Longitude: {{ station.longitude }}</p>
+                  <p class="text-gray-600">Latitude: {{ station.location.latitude }}</p>
+                  <p class="text-gray-600">Longitude: {{ station.location.longitude }}</p>
                 </div>
               </div>
 
-              <!-- Description -->
-              @if (station.description) {
+              <!-- Instructions -->
+              @if (station.instruction) {
                 <div>
-                  <h3 class="text-lg font-semibold text-gray-900 mb-3">Description</h3>
-                  <p class="text-gray-600 leading-relaxed">{{ station.description }}</p>
+                  <h3 class="text-lg font-semibold text-gray-900 mb-3">Instructions d'accès</h3>
+                  <p class="text-gray-600 leading-relaxed">{{ station.instruction }}</p>
                 </div>
               }
             </div>
@@ -127,20 +134,22 @@
           <div class="mt-8 pt-8 border-t border-gray-200">
             <div class="flex flex-wrap gap-4">
               <!-- Bouton réserver -->
-              @if (station.stationStatus === 'AVAILABLE') {
-                <button class="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition font-semibold">
-                  Réserver cette borne
+              @if (station.available) {
+                <a [routerLink]="['/bookings/new', station.id]" class="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition font-semibold text-center">
+                  💳 Réserver cette borne
+                </a>
+              } @else {
+                <button disabled class="flex-1 px-6 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-semibold">
+                  Borne non disponible
                 </button>
               }
 
               <!-- Boutons propriétaire -->
               @if (canEdit()) {
-                <a [routerLink]="['/stations', station.id, 'edit']" 
-                   class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-semibold">
+                <a [routerLink]="['/stations', station.id, 'edit']" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-semibold">
                   Modifier
                 </a>
-                <button (click)="deleteStation()" 
-                        class="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-semibold">
+                <button (click)="deleteStation()" class="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-semibold">
                   Supprimer
                 </button>
               }

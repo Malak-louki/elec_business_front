@@ -1,0 +1,116 @@
+<app-navbar></app-navbar>
+
+<div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 py-8">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Bouton retour -->
+    <div class="mb-6">
+      <a routerLink="/bookings" class="inline-flex items-center text-gray-600 hover:text-gray-900 transition">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Retour
+      </a>
+    </div>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-gray-900">Finaliser le paiement</h1>
+      <p class="text-gray-600 mt-2">Sécurisez votre réservation en effectuant le paiement</p>
+    </div>
+
+    <!-- Chargement -->
+    @if (isLoading) {
+      <div class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    }
+
+    <!-- Messages -->
+    @if (errorMessage) {
+      <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <p class="text-red-600">{{ errorMessage }}</p>
+      </div>
+    }
+
+    @if (successMessage) {
+      <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+        <p class="text-green-600">{{ successMessage }}</p>
+      </div>
+    }
+
+    <!-- Contenu -->
+    @if (!isLoading && booking) {
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Résumé de la réservation -->
+        <div class="bg-white rounded-2xl shadow-xl p-6">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Résumé de la réservation</h2>
+          
+          <div class="space-y-4">
+            <div>
+              <p class="text-sm text-gray-500">Station</p>
+              <p class="text-lg font-semibold">{{ booking.chargingStation.name }}</p>
+            </div>
+
+            <div>
+              <p class="text-sm text-gray-500">Début</p>
+              <p class="font-medium">{{ formatDate(booking.startDateTime) }}</p>
+            </div>
+
+            <div>
+              <p class="text-sm text-gray-500">Fin</p>
+              <p class="font-medium">{{ formatDate(booking.endDateTime) }}</p>
+            </div>
+
+            <div class="pt-4 border-t border-gray-200">
+              <p class="text-sm text-gray-500 mb-1">Montant total</p>
+              <p class="text-3xl font-bold text-primary">{{ booking.totalAmount }}€</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Méthode de paiement -->
+        <div class="bg-white rounded-2xl shadow-xl p-6">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Méthode de paiement</h2>
+
+          <div class="space-y-3 mb-6">
+            @for (method of paymentMethods; track method.value) {
+              <label [ngClass]="{'ring-2 ring-primary': selectedPaymentMethod === method.value}" class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                <input type="radio" name="paymentMethod" [value]="method.value" [(ngModel)]="selectedPaymentMethod" class="mr-3"/>
+                <span class="text-2xl mr-3">{{ method.icon }}</span>
+                <span class="font-medium">{{ method.label }}</span>
+              </label>
+            }
+          </div>
+
+          <!-- Boutons de simulation -->
+          <div class="space-y-3">
+            <button (click)="processPayment(true)" [disabled]="isProcessing || booking.bookingStatus !== 'PENDING'" class="w-full py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition disabled:opacity-50 disabled:cursor-not-allowed">
+              @if (isProcessing) {
+                <span>Traitement en cours...</span>
+              } @else {
+                <span>✅ Payer {{ booking.totalAmount }}€ (Simulation réussite)</span>
+              }
+            </button>
+
+            <button (click)="processPayment(false)" [disabled]="isProcessing || booking.bookingStatus !== 'PENDING'" class="w-full py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
+              <span>❌ Simuler un échec de paiement</span>
+            </button>
+          </div>
+
+          <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex">
+              <svg class="w-5 h-5 text-blue-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <div>
+                <p class="text-sm text-blue-800">
+                  Ceci est une simulation de paiement. Aucun argent ne sera débité.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

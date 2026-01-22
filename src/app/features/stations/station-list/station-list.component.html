@@ -24,7 +24,7 @@
           <input
             type="text"
             placeholder="Rechercher par ville..."
-            (input)="onSearchInput($event)"
+            [(ngModel)]="searchCity"
             class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
           />
           <button
@@ -37,30 +37,30 @@
     </div>
 
     <!-- Messages d'erreur -->
-    @if (errorMessage) {
+    @if (errorMessage()) {
       <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-        <p class="text-red-600">{{ errorMessage }}</p>
+        <p class="text-red-600">{{ errorMessage() }}</p>
       </div>
     }
 
     <!-- Chargement -->
-    @if (isLoading) {
+    @if (isLoading()) {
       <div class="flex justify-center items-center py-12">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     }
 
     <!-- Liste des stations -->
-    @if (!isLoading && stations.length > 0) {
+    @if (!isLoading() && stations().length > 0) {
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @for (station of stations; track station.id) {
+        @for (station of stations(); track station.id) {
           <app-station-card [station]="station"></app-station-card>
         }
       </div>
     }
 
     <!-- Aucune station -->
-    @if (!isLoading && stations.length === 0) {
+    @if (!isLoading() && stations().length === 0) {
       <div class="text-center py-12">
         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>

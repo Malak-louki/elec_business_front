@@ -1,26 +1,27 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ChargingStationService } from '../../../core/services/charging-station.service';
 import { ChargingStationResponse } from '../../../core/models/charging-station.model';
-import { NavbarComponent } from '../../../shared/layout/navbar/navbar.component';
-import { StationCardComponent } from '../station-card/station-card.component';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth.service'; 
+import { NavbarComponent } from '../../../shared/layout/navbar/navbar.component'; 
+import { StationCardComponent } from '../station-card/station-card.component'; 
 
 @Component({
   selector: 'app-station-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, NavbarComponent, StationCardComponent],
+  imports: [CommonModule, RouterLink, FormsModule, NavbarComponent, StationCardComponent], 
   templateUrl: './station-list.component.html',
-  styleUrl: './station-list.component.scss'
+  styleUrls: ['./station-list.component.scss']
 })
 export class StationListComponent implements OnInit {
   private stationService = inject(ChargingStationService);
-  authService = inject(AuthService);
+  authService = inject(AuthService); 
 
-  stations: ChargingStationResponse[] = [];
-  isLoading = true;
-  errorMessage = '';
+  stations = signal<ChargingStationResponse[]>([]);
+  isLoading = signal(false); 
+  errorMessage = signal<string | null>(null); 
   searchCity = '';
 
   ngOnInit(): void {
@@ -28,18 +29,18 @@ export class StationListComponent implements OnInit {
   }
 
   loadStations(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-
-    this.stationService.getAllStations().subscribe({
-      next: (stations) => {
-        this.stations = stations;
-        this.isLoading = false;
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+    
+    this.stationService.getAvailableStations().subscribe({
+      next: (stations: ChargingStationResponse[]) => {
+        this.stations.set(stations);
+        this.isLoading.set(false);
       },
-      error: (error) => {
-        this.errorMessage = 'Erreur lors du chargement des stations';
-        this.isLoading = false;
-        console.error('Erreur:', error);
+      error: (error: any) => {
+        this.errorMessage.set('Erreur lors du chargement des stations');
+        this.isLoading.set(false);
+        console.error('Error loading stations:', error);
       }
     });
   }
@@ -50,16 +51,18 @@ export class StationListComponent implements OnInit {
       return;
     }
 
-    this.isLoading = true;
-    this.stationService.searchByCity(this.searchCity).subscribe({
-      next: (stations) => {
-        this.stations = stations;
-        this.isLoading = false;
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+
+    this.stationService.getStationsByCity(this.searchCity.trim()).subscribe({
+      next: (stations: ChargingStationResponse[]) => {
+        this.stations.set(stations);
+        this.isLoading.set(false);
       },
-      error: (error) => {
-        this.errorMessage = 'Erreur lors de la recherche';
-        this.isLoading = false;
-        console.error('Erreur:', error);
+      error: (error: any) => {
+        this.errorMessage.set('Erreur lors de la recherche');
+        this.isLoading.set(false);
+        console.error('Error searching stations:', error);
       }
     });
   }
@@ -67,5 +70,28 @@ export class StationListComponent implements OnInit {
   onSearchInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.searchCity = input.value;
+  }
+
+  clearSearch(): void {
+    this.searchCity = '';
+    this.loadStations();
+  }
+
+  deleteStation(stationId: string): void {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette station ?')) {
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.stationService.deleteStation(stationId).subscribe({
+      next: () => {
+        this.loadStations();
+      },
+      error: (error: any) => {
+        this.errorMessage.set('Erreur lors de la suppression');
+        this.isLoading.set(false);
+        console.error('Error deleting station:', error);
+      }
+    });
   }
 }
