@@ -54,6 +54,22 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'bookings',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/bookings/booking-list/booking-list.component')
+          .then(m => m.BookingListComponent)
+      },
+      {
+        path: 'new/:stationId',
+        loadComponent: () => import('./features/bookings/booking-form/booking-form.component')
+          .then(m => m.BookingFormComponent)
+      }
+    ]
+  },
+  {
     path: '**',
     redirectTo: '/home'
   }

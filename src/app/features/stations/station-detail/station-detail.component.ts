@@ -64,33 +64,11 @@ export class StationDetailComponent implements OnInit {
   }
 
   canEdit(): boolean {
-    if (!this.station) return false;
+    if (!this.station || !this.station.owner) return false;
     const currentUser = this.authService.currentUser();
     return (
-      currentUser?.id === this.station.ownerId || 
+      currentUser?.id === this.station.owner.id || 
       this.authService.isAdmin()
     );
-  }
-
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'AVAILABLE': return 'bg-green-100 text-green-800';
-      case 'OCCUPIED': return 'bg-red-100 text-red-800';
-      case 'MAINTENANCE': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  }
-
-  getStatusText(status: string): string {
-    switch (status) {
-      case 'AVAILABLE': return 'Disponible';
-      case 'OCCUPIED': return 'Occupée';
-      case 'MAINTENANCE': return 'En maintenance';
-      default: return status;
-    }
-  }
-
-  getPowerTypeText(powerType: string): string {
-    return powerType === 'DC' ? 'Courant continu (DC)' : 'Courant alternatif (AC)';
   }
 }

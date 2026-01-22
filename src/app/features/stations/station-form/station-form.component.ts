@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ChargingStationService } from '../../../core/services/charging-station.service';
-import { PowerType } from '../../../core/models/charging-station.model';
 import { NavbarComponent } from '../../../shared/layout/navbar/navbar.component';
 
 @Component({
@@ -26,20 +25,19 @@ export class StationFormComponent implements OnInit {
   isEditMode = false;
   stationId: string | null = null;
 
-  powerTypes = Object.values(PowerType);
-
   constructor() {
     this.stationForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
-      address: ['', [Validators.required, Validators.minLength(5)]],
+      street: ['', [Validators.required, Validators.minLength(5)]],
       city: ['', [Validators.required, Validators.minLength(2)]],
       postalCode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
+      country: ['France'],
       latitude: ['', [Validators.required, Validators.min(-90), Validators.max(90)]],
       longitude: ['', [Validators.required, Validators.min(-180), Validators.max(180)]],
-      powerType: [PowerType.AC, [Validators.required]],
-      maxPower: ['', [Validators.required, Validators.min(3), Validators.max(350)]],
-      pricePerHour: ['', [Validators.required, Validators.min(0.1), Validators.max(100)]],
-      description: ['', [Validators.maxLength(500)]]
+      chargingPowerKw: ['', [Validators.required, Validators.min(3), Validators.max(350)]],
+      hourlyPrice: ['', [Validators.required, Validators.min(0.1), Validators.max(999.99)]],
+      instruction: ['', [Validators.maxLength(500)]],
+      hasStand: [false]
     });
   }
 
@@ -57,15 +55,16 @@ export class StationFormComponent implements OnInit {
       next: (station) => {
         this.stationForm.patchValue({
           name: station.name,
-          address: station.address,
-          city: station.city,
-          postalCode: station.postalCode,
-          latitude: station.latitude,
-          longitude: station.longitude,
-          powerType: station.powerType,
-          maxPower: station.maxPower,
-          pricePerHour: station.pricePerHour,
-          description: station.description
+          street: station.address.street,
+          city: station.address.city,
+          postalCode: station.address.postalCode,
+          country: station.address.country || 'France',
+          latitude: station.location.latitude,
+          longitude: station.location.longitude,
+          chargingPowerKw: station.chargingPowerKw,
+          hourlyPrice: station.hourlyPrice,
+          instruction: station.instruction,
+          hasStand: station.hasStand
         });
         this.isLoading = false;
       },
@@ -87,7 +86,23 @@ export class StationFormComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    const formData = this.stationForm.value;
+    const formData = {
+      name: this.stationForm.value.name,
+      hourlyPrice: this.stationForm.value.hourlyPrice,
+      chargingPowerKw: this.stationForm.value.chargingPowerKw,
+      instruction: this.stationForm.value.instruction,
+      hasStand: this.stationForm.value.hasStand,
+      address: {
+        street: this.stationForm.value.street,
+        city: this.stationForm.value.city,
+        postalCode: this.stationForm.value.postalCode,
+        country: this.stationForm.value.country
+      },
+      location: {
+        latitude: this.stationForm.value.latitude,
+        longitude: this.stationForm.value.longitude
+      }
+    };
 
     const observable = this.isEditMode && this.stationId
       ? this.stationService.updateStation(this.stationId, formData)
@@ -114,19 +129,17 @@ export class StationFormComponent implements OnInit {
     });
   }
 
-  // Méthode helper pour obtenir les coordonnées GPS de l'adresse
   getCoordinatesFromAddress(): void {
-    const address = this.stationForm.get('address')?.value;
+    const street = this.stationForm.get('street')?.value;
     const city = this.stationForm.get('city')?.value;
     const postalCode = this.stationForm.get('postalCode')?.value;
 
-    if (!address || !city || !postalCode) {
+    if (!street || !city || !postalCode) {
       alert('Veuillez remplir l\'adresse complète d\'abord');
       return;
     }
 
     // Pour l'instant, on met des valeurs par défaut (France)
-    // Dans une vraie app, on utiliserait une API de géocodage
     this.stationForm.patchValue({
       latitude: 48.8566,
       longitude: 2.3522
@@ -136,13 +149,12 @@ export class StationFormComponent implements OnInit {
   }
 
   get name() { return this.stationForm.get('name'); }
-  get address() { return this.stationForm.get('address'); }
+  get street() { return this.stationForm.get('street'); }
   get city() { return this.stationForm.get('city'); }
   get postalCode() { return this.stationForm.get('postalCode'); }
   get latitude() { return this.stationForm.get('latitude'); }
   get longitude() { return this.stationForm.get('longitude'); }
-  get powerType() { return this.stationForm.get('powerType'); }
-  get maxPower() { return this.stationForm.get('maxPower'); }
-  get pricePerHour() { return this.stationForm.get('pricePerHour'); }
-  get description() { return this.stationForm.get('description'); }
+  get chargingPowerKw() { return this.stationForm.get('chargingPowerKw'); }
+  get hourlyPrice() { return this.stationForm.get('hourlyPrice'); }
+  get instruction() { return this.stationForm.get('instruction'); }
 }
