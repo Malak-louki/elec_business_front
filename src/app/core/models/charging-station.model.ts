@@ -18,6 +18,7 @@ export interface ChargingStation {
 
 export interface Address {
   street: string;
+  number: string;
   city: string;
   postalCode: string;
   country?: string;
@@ -29,7 +30,7 @@ export interface Location {
 }
 
 export interface Availability {
-  dayOfWeek: string;
+  day: string;
   startTime: string;
   endTime: string;
 }
@@ -71,3 +72,4 @@ export interface ChargingStationResponse {
   availabilities?: Availability[];
   owner?: OwnerInfo;
 }
+

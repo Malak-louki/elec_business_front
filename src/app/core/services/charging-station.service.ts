@@ -2,70 +2,108 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { 
-  ChargingStationRequest, 
-  ChargingStationResponse 
+import {
+  ChargingStationRequest,
+  ChargingStationResponse
 } from '../models/charging-station.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChargingStationService {
+
   private readonly http = inject(HttpClient);
   private readonly API_URL = `${environment.apiUrl}/charging-stations`;
 
   /**
-   * Récupère toutes les stations
+   * Get all available charging stations
+   * GET /api/charging-stations
    */
-  getAllStations(): Observable<ChargingStationResponse[]> {
+  getAvailableStations(): Observable<ChargingStationResponse[]> {
     return this.http.get<ChargingStationResponse[]>(this.API_URL);
   }
 
   /**
-   * Récupère une station par ID
+   * Get charging station by id
+   * GET /api/charging-stations/{id}
    */
   getStationById(id: string): Observable<ChargingStationResponse> {
     return this.http.get<ChargingStationResponse>(`${this.API_URL}/${id}`);
   }
 
   /**
-   * Récupère les stations d'un propriétaire
+   * Get stations owned by current user
+   * GET /api/charging-stations/mine
    */
   getMyStations(): Observable<ChargingStationResponse[]> {
-    return this.http.get<ChargingStationResponse[]>(`${this.API_URL}/my-stations`);
+    return this.http.get<ChargingStationResponse[]>(`${this.API_URL}/mine`);
   }
 
   /**
-   * Recherche des stations par ville
+   * Get stations by city
+   * GET /api/charging-stations/city/{city}
    */
-  searchByCity(city: string): Observable<ChargingStationResponse[]> {
-    const params = new HttpParams().set('city', city);
-    return this.http.get<ChargingStationResponse[]>(`${this.API_URL}/search`, { params });
+  getStationsByCity(city: string): Observable<ChargingStationResponse[]> {
+    return this.http.get<ChargingStationResponse[]>(
+      `${this.API_URL}/city/${city}`
+    );
   }
 
   /**
-   * Recherche des stations disponibles
+   * Advanced search
+   * GET /api/charging-stations/search
    */
-  getAvailableStations(): Observable<ChargingStationResponse[]> {
-    return this.http.get<ChargingStationResponse[]>(`${this.API_URL}/available`);
+  searchStations(
+    city?: string,
+    maxPrice?: number,
+    minPowerKw?: number
+  ): Observable<ChargingStationResponse[]> {
+
+    let params = new HttpParams();
+
+    if (city) {
+      params = params.set('city', city);
+    }
+    if (maxPrice !== undefined) {
+      params = params.set('maxPrice', maxPrice.toString());
+    }
+    if (minPowerKw !== undefined) {
+      params = params.set('minPowerKw', minPowerKw.toString());
+    }
+
+    return this.http.get<ChargingStationResponse[]>(
+      `${this.API_URL}/search`,
+      { params }
+    );
   }
 
   /**
-   * Crée une nouvelle station (OWNER)
+   * Create charging station (OWNER)
+   * POST /api/charging-stations
    */
-  createStation(request: ChargingStationRequest): Observable<ChargingStationResponse> {
+  createStation(
+    request: ChargingStationRequest
+  ): Observable<ChargingStationResponse> {
     return this.http.post<ChargingStationResponse>(this.API_URL, request);
   }
 
   /**
-   * Met à jour une station (OWNER)
+   * Update charging station (OWNER)
+   * PUT /api/charging-stations/{id}
    */
-  updateStation(id: string, request: ChargingStationRequest): Observable<ChargingStationResponse> {
-    return this.http.put<ChargingStationResponse>(`${this.API_URL}/${id}`, request);
+  updateStation(
+    id: string,
+    request: ChargingStationRequest
+  ): Observable<ChargingStationResponse> {
+    return this.http.put<ChargingStationResponse>(
+      `${this.API_URL}/${id}`,
+      request
+    );
   }
 
   /**
-   * Supprime une station (OWNER)
+   * Delete charging station (OWNER)
+   * DELETE /api/charging-stations/{id}
    */
   deleteStation(id: string): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/${id}`);

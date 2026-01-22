@@ -11,21 +11,43 @@ export interface Booking {
   startDateTime: string;
   endDateTime: string;
   totalAmount: number;
+  expiresAt: string;
   bookingStatus: BookingStatus;
-  userId: string;
-  stationId: string;
-  stationName?: string;
-  paymentId?: string;
   invoicePath?: string;
-  expiresAt?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  chargingStation: ChargingStationSummary;
+  customer?: UserSummary;
+  payment?: PaymentSummary;
+}
+
+export interface ChargingStationSummary {
+  id: string;
+  name: string;
+  hourlyPrice: number;
+  chargingPower: string;
+  address: string;
+}
+
+export interface UserSummary {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+}
+
+export interface PaymentSummary {
+  id: string;
+  stripePaymentIntentId?: string;
+  paymentStatus: string;
 }
 
 export interface BookingRequest {
-  stationId: string;
+  chargingStationId: string;
   startDateTime: string;
   endDateTime: string;
+  notes?: string;
 }
 
 export interface BookingResponse {
@@ -33,24 +55,22 @@ export interface BookingResponse {
   startDateTime: string;
   endDateTime: string;
   totalAmount: number;
-  bookingStatus: string;
-  userId: string;
-  stationId: string;
-  stationName: string;
-  paymentId?: string;
-  invoicePath?: string;
   expiresAt: string;
+  bookingStatus: string;
+  invoicePath?: string;
   createdAt: string;
   updatedAt: string;
+  chargingStation: ChargingStationSummary;
+  customer?: UserSummary;
+  payment?: PaymentSummary;
 }
 
 export interface AvailabilityRequest {
   stationId: string;
-  startDateTime: string;
-  endDateTime: string;
+  start: string;
+  end: string;
 }
 
 export interface AvailabilityResponse {
   available: boolean;
-  message?: string;
 }

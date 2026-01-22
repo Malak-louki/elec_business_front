@@ -6,6 +6,7 @@ import { BookingService } from '../../../core/services/booking.service';
 import { ChargingStationService } from '../../../core/services/charging-station.service';
 import { ChargingStationResponse } from '../../../core/models/charging-station.model';
 import { NavbarComponent } from '../../../shared/layout/navbar/navbar.component';
+import { BookingRequest } from '../../../core/models/booking.model'; 
 
 @Component({
   selector: 'app-booking-form',
@@ -70,39 +71,6 @@ export class BookingFormComponent implements OnInit {
     });
   }
 
-  checkAvailability(): void {
-    if (!this.station || this.bookingForm.invalid) {
-      return;
-    }
-
-    this.isCheckingAvailability = true;
-    this.errorMessage = '';
-
-    const request = {
-      stationId: this.station.id,
-      startDateTime: this.bookingForm.value.startDateTime,
-      endDateTime: this.bookingForm.value.endDateTime
-    };
-
-    this.bookingService.checkAvailability(request).subscribe({
-      next: (response) => {
-        this.isAvailable = response.available;
-        if (!response.available) {
-          this.errorMessage = response.message || 'Cette borne n\'est pas disponible pour ces dates';
-        } else {
-          this.successMessage = 'La borne est disponible !';
-          this.calculateEstimatedAmount();
-        }
-        this.isCheckingAvailability = false;
-      },
-      error: (error) => {
-        this.errorMessage = 'Erreur lors de la vérification de disponibilité';
-        this.isCheckingAvailability = false;
-        console.error('Erreur:', error);
-      }
-    });
-  }
-
   calculateEstimatedAmount(): void {
     if (!this.station || !this.bookingForm.value.startDateTime || !this.bookingForm.value.endDateTime) {
       this.estimatedAmount = 0;
@@ -116,42 +84,81 @@ export class BookingFormComponent implements OnInit {
     );
   }
 
-  onSubmit(): void {
-    if (this.bookingForm.invalid || !this.station || !this.isAvailable) {
-      this.bookingForm.markAllAsTouched();
-      if (!this.isAvailable) {
-        this.errorMessage = 'Veuillez vérifier la disponibilité avant de réserver';
-      }
-      return;
-    }
-
-    this.isLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    const request = {
-      stationId: this.station.id,
-      startDateTime: this.bookingForm.value.startDateTime,
-      endDateTime: this.bookingForm.value.endDateTime
-    };
-
-    this.bookingService.createBooking(request).subscribe({
-      next: (response) => {
-        this.successMessage = 'Réservation créée avec succès !';
-        setTimeout(() => {
-          this.router.navigate(['/bookings', response.id]);
-        }, 1500);
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.errorMessage = error.error?.message || 'Erreur lors de la réservation';
-        console.error('Erreur:', error);
-      },
-      complete: () => {
-        this.isLoading = false;
-      }
-    });
+  checkAvailability(): void {
+  if (!this.station || this.bookingForm.invalid) {
+    return;
   }
+
+  this.isCheckingAvailability = true;
+  this.errorMessage = '';
+
+  // Formater les dates pour le backend
+  const startFormatted = this.bookingService.formatDateTimeForBackend(this.bookingForm.value.startDateTime);
+  const endFormatted = this.bookingService.formatDateTimeForBackend(this.bookingForm.value.endDateTime);
+
+  this.bookingService.checkAvailability(
+    this.station.id,
+    startFormatted,
+    endFormatted
+  ).subscribe({
+    next: (response) => {
+      this.isAvailable = response.available;
+      if (!response.available) {
+        this.errorMessage = 'Cette borne n\'est pas disponible pour ces dates';
+      } else {
+        this.successMessage = 'La borne est disponible !';
+        this.calculateEstimatedAmount();
+      }
+      this.isCheckingAvailability = false;
+    },
+    error: (error) => {
+      this.errorMessage = 'Erreur lors de la vérification de disponibilité';
+      this.isCheckingAvailability = false;
+      console.error('Erreur:', error);
+    }
+  });
+}
+
+onSubmit(): void {
+  if (this.bookingForm.invalid || !this.station || !this.isAvailable) {
+    this.bookingForm.markAllAsTouched();
+    if (!this.isAvailable) {
+      this.errorMessage = 'Veuillez vérifier la disponibilité avant de réserver';
+    }
+    return;
+  }
+
+  this.isLoading = true;
+  this.errorMessage = '';
+  this.successMessage = '';
+
+  // Formater les dates pour le backend
+  const startFormatted = this.bookingService.formatDateTimeForBackend(this.bookingForm.value.startDateTime);
+  const endFormatted = this.bookingService.formatDateTimeForBackend(this.bookingForm.value.endDateTime);
+
+  const request: BookingRequest = {
+    chargingStationId: this.station.id,
+    startDateTime: startFormatted,
+    endDateTime: endFormatted
+  };
+
+  this.bookingService.createBooking(request).subscribe({
+    next: (response) => {
+      this.successMessage = 'Réservation créée avec succès !';
+      setTimeout(() => {
+        this.router.navigate(['/bookings/payment', response.id]);
+      }, 1500);
+    },
+    error: (error) => {
+      this.isLoading = false;
+      this.errorMessage = error.error?.message || 'Erreur lors de la réservation';
+      console.error('Erreur:', error);
+    },
+    complete: () => {
+      this.isLoading = false;
+    }
+  });
+}
 
   // Validators
   minDateValidator(control: any) {

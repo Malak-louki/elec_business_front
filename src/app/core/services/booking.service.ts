@@ -5,7 +5,6 @@ import { environment } from '../../../environments/environment';
 import { 
   BookingRequest, 
   BookingResponse,
-  AvailabilityRequest,
   AvailabilityResponse
 } from '../models/booking.model';
 
@@ -27,7 +26,7 @@ export class BookingService {
    * Récupère toutes les réservations de l'utilisateur connecté
    */
   getMyBookings(): Observable<BookingResponse[]> {
-    return this.http.get<BookingResponse[]>(`${this.API_URL}/my-bookings`);
+    return this.http.get<BookingResponse[]>(`${this.API_URL}/my`);
   }
 
   /**
@@ -46,14 +45,15 @@ export class BookingService {
 
   /**
    * Vérifie la disponibilité d'une station
+   * GET /api/bookings/availability?stationId=xxx&start=2024-01-15T10:00:00&end=2024-01-15T12:00:00
    */
-  checkAvailability(request: AvailabilityRequest): Observable<AvailabilityResponse> {
+  checkAvailability(stationId: string, start: string, end: string): Observable<AvailabilityResponse> {
     const params = new HttpParams()
-      .set('stationId', request.stationId)
-      .set('startDateTime', request.startDateTime)
-      .set('endDateTime', request.endDateTime);
+      .set('stationId', stationId)
+      .set('start', start)
+      .set('end', end);
 
-    return this.http.get<AvailabilityResponse>(`${this.API_URL}/check-availability`, { params });
+    return this.http.get<AvailabilityResponse>(`${this.API_URL}/availability`, { params });
   }
 
   /**
@@ -63,7 +63,7 @@ export class BookingService {
     const startDate = new Date(start);
     const endDate = new Date(end);
     const diffMs = endDate.getTime() - startDate.getTime();
-    return Math.ceil(diffMs / (1000 * 60 * 60)); // Arrondi supérieur
+    return Math.ceil(diffMs / (1000 * 60 * 60));
   }
 
   /**
@@ -72,5 +72,16 @@ export class BookingService {
   calculateTotalAmount(pricePerHour: number, start: string, end: string): number {
     const hours = this.calculateDuration(start, end);
     return hours * pricePerHour;
+  }
+
+  /**
+   * Formate une date pour l'API backend (ISO 8601)
+   * Input: "2024-01-15T10:30" (datetime-local)
+   * Output: "2024-01-15T10:30:00"
+   */
+  formatDateTimeForBackend(dateTimeLocal: string): string {
+    if (!dateTimeLocal) return '';
+    // Ajouter les secondes si elles ne sont pas présentes
+    return dateTimeLocal.includes(':00:00') ? dateTimeLocal : `${dateTimeLocal}:00`;
   }
 }

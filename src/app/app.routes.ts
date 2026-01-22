@@ -38,8 +38,8 @@ export const routes: Routes = [
       },
       {
         path: 'new',
-        loadComponent: () => import('./features/stations/station-form/station-form.component')
-          .then(m => m.StationFormComponent)
+        loadComponent: () => import('./features/stations/add-station/add-station.component')
+          .then(m => m.AddStationComponent)
       },
       {
         path: ':id',
@@ -66,6 +66,11 @@ export const routes: Routes = [
         path: 'new/:stationId',
         loadComponent: () => import('./features/bookings/booking-form/booking-form.component')
           .then(m => m.BookingFormComponent)
+      },
+      {
+        path: 'payment/:bookingId',
+        loadComponent: () => import('./features/bookings/booking-payment/booking-payment.component')
+          .then(m => m.BookingPaymentComponent)
       }
     ]
   },

@@ -1,1 +1,75 @@
-<p>booking-list works!</p>
+<app-navbar></app-navbar>
+
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Mes réservations</h1>
+      <p class="text-gray-600 mt-2">Gérez vos réservations de bornes de recharge</p>
+    </div>
+
+    <!-- Filtres par statut -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+      <div class="flex flex-wrap gap-2">
+        @for (status of bookingStatuses; track status) {
+          <button
+            (click)="filterByStatus(status)"
+            [ngClass]="{
+              'bg-primary text-white': selectedStatus === status,
+              'bg-gray-100 text-gray-700 hover:bg-gray-200': selectedStatus !== status
+            }"
+            class="px-4 py-2 rounded-lg font-medium transition">
+            {{ getStatusText(status) }} ({{ getStatusCount(status) }})
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Messages d'erreur -->
+    @if (errorMessage) {
+      <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <p class="text-red-600">{{ errorMessage }}</p>
+      </div>
+    }
+
+    <!-- Chargement -->
+    @if (isLoading) {
+      <div class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    }
+
+    <!-- Liste des réservations -->
+    @if (!isLoading && filteredBookings.length > 0) {
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (booking of filteredBookings; track booking.id) {
+          <app-booking-card 
+            [booking]="booking"
+            (bookingCancelled)="onBookingCancelled($event)">
+          </app-booking-card>
+        }
+      </div>
+    }
+
+    <!-- Aucune réservation -->
+    @if (!isLoading && filteredBookings.length === 0) {
+      <div class="text-center py-12 bg-white rounded-lg shadow-md">
+        <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune réservation</h3>
+        <p class="text-gray-500 mb-6">
+          {{ selectedStatus === 'ALL' ? 'Vous n\'avez pas encore de réservation' : 'Aucune réservation avec ce statut' }}
+        </p>
+        @if (selectedStatus === 'ALL') {
+          <a routerLink="/stations" class="inline-flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            Rechercher une borne
+          </a>
+        }
+      </div>
+    }
+  </div>
+</div>
