@@ -1,7 +1,8 @@
 export enum UserStatus {
   PENDING = 'PENDING',
   ACTIVE = 'ACTIVE',
-  SUSPENDED = 'SUSPENDED'
+  SUSPENDED = 'SUSPENDED',
+  BANNED = 'BANNED'
 }
 
 export enum RoleName {
