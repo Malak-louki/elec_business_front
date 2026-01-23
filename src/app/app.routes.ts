@@ -28,6 +28,18 @@ export const routes: Routes = [
       .then(m => m.EmailValidationComponent)
   },
   {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/profile/profile.component')
+      .then(m => m.ProfileComponent)
+  },
+  {
+    path: 'dashboard',
+    canActivate: [authGuard],  // 🆕 Route pour le dashboard owner
+    loadComponent: () => import('./features/dashboard/dashboard.component')
+      .then(m => m.OwnerDashboardComponent)
+  },
+  {
     path: 'stations',
     canActivate: [authGuard],
     children: [
