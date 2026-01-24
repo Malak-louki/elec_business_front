@@ -84,4 +84,24 @@ export class BookingService {
     // Ajouter les secondes si elles ne sont pas présentes
     return dateTimeLocal.includes(':00:00') ? dateTimeLocal : `${dateTimeLocal}:00`;
   }
+  // booking.service.ts ou dans ton composant
+validateBookingDuration(start: Date, end: Date): { valid: boolean; error?: string } {
+  const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+  
+  if (durationHours < 1) {
+    return { 
+      valid: false, 
+      error: 'La durée minimale de réservation est de 1 heure' 
+    };
+  }
+  
+  if (durationHours > 168) {  // 7 jours × 24h
+    return { 
+      valid: false, 
+      error: 'La durée maximale de réservation est de 7 jours (168 heures)' 
+    };
+  }
+  
+  return { valid: true };
+}
 }
