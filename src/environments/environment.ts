@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:8080/api', 
+  apiUrl: 'https://elecbusiness.onrender.com/api', 
   apiTimeout: 30000
 };
