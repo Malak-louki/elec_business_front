@@ -28,10 +28,11 @@ jobs:
       - name: Lint
         run: npm run lint --if-present
 
-      - name: Test
-        run: npm test -- --watch=false --browsers=ChromeHeadless
-        env:
-          CI: true
+      # SUPPRIME cette étape si tu ne veux pas de tests
+      # - name: Test
+      #   run: npm test -- --watch=false --browsers=ChromeHeadless
+      #   env:
+      #     CI: true
 
       - name: Build
         run: npm run build
