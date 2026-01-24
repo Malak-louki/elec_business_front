@@ -56,6 +56,9 @@ export class AddStationComponent {
     });
   }
 
+  /**
+   * Getter pour accéder au FormArray des disponibilités
+   */
   get availabilities(): FormArray {
     return this.stationForm.get('availabilities') as FormArray;
   }
@@ -144,7 +147,7 @@ export class AddStationComponent {
         
         // Redirection après 1.5 secondes
         setTimeout(() => {
-          this.router.navigate(['/stations']);  // ou '/owner-dashboard' si vous l'avez
+          this.router.navigate(['/stations']);
         }, 1500);
       },
       error: (err) => {
@@ -156,7 +159,7 @@ export class AddStationComponent {
           this.error.set('Vous devez être connecté pour ajouter une station.');
           setTimeout(() => this.router.navigate(['/login']), 2000);
         } else if (err.status === 403) {
-          this.error.set('Vous n\'avez pas les permissions nécessaires.');
+          this.error.set('Vous n\'avez pas les permissions nécessaires. Seuls les propriétaires (OWNER) peuvent ajouter des stations.');
         } else if (err.error?.message) {
           this.error.set(err.error.message);
         } else {
