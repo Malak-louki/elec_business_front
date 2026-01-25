@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ],
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build -- --configuration production",
   "outputDirectory": "dist/elec_business_front/browser",
-  "framework": "angular"
+  "framework": "angular",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
