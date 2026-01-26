@@ -39,6 +39,10 @@ export class ChargingStationService {
     return this.http.get<ChargingStationResponse[]>(`${this.API_URL}/mine`);
   }
 
+    getAllStations(): Observable<ChargingStationResponse[]> {
+    return this.http.get<ChargingStationResponse[]>(`${this.API_URL}/charging-stations`);
+  }
+
   /**
    * Get stations by city
    * GET /api/charging-stations/city/{city}
