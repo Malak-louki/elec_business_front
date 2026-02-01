@@ -79,12 +79,12 @@ export class AuthService {
   /**
    * Validation email avec token
    */
-  validateEmail(token: string): Observable<ValidationResponse> {
-    return this.http.get<ValidationResponse>(
-      `${environment.apiUrl}/auth/validate-email`,
-      { params: { token } }
-    );
-  }
+validateEmail(code: string): Observable<ValidationResponse> {
+  return this.http.get<ValidationResponse>(
+    `${environment.apiUrl}/auth/validate`,  
+    { params: { code } }
+  );
+}
 
   /**
    * Déconnexion

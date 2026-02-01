@@ -1,19 +1,19 @@
-<div class="bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden">
+<div class="bg-dark-card rounded-2xl shadow-lg hover:shadow-xl transition overflow-hidden">
   <!-- Badge statut -->
   <div class="p-4 pb-0">
-    <span [ngClass]="'inline-block px-3 py-1 rounded-full text-sm font-semibold ' + (station.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')">
-      {{ station.available ? 'Disponible' : 'Occupée' }}
+    <span [ngClass]="'inline-block px-3 py-1 rounded-full text-sm font-semibold ' + (station.available ? 'bg-primary/20 text-primary border border-primary' : 'bg-red-900/30 text-red-400 border border-red-700')">
+      {{ station.available ? 'disponible' : 'occupée' }}
     </span>
   </div>
 
   <!-- Contenu -->
   <div class="p-6">
-    <h3 class="text-xl font-bold text-gray-900 mb-2">{{ station.name }}</h3>
+    <h3 class="text-xl font-bold text-white mb-4">{{ station.name }}</h3>
     
-    <div class="space-y-2 mb-4">
+    <div class="space-y-3 mb-6">
       <!-- Adresse -->
-      <div class="flex items-start text-gray-600">
-        <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="flex items-start text-gray-300">
+        <svg class="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
         </svg>
@@ -21,33 +21,35 @@
       </div>
 
       <!-- Puissance -->
-      <div class="flex items-center text-gray-600">
-        <span class="text-xl mr-2">⚡</span>
+      <div class="flex items-center text-gray-300">
+        <svg class="w-5 h-5 mr-3 text-primary" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
+        </svg>
         <span class="text-sm">{{ station.chargingPower || station.chargingPowerKw + ' kW' }}</span>
       </div>
 
       <!-- Prix -->
-      <div class="flex items-center text-gray-600">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="flex items-center text-gray-300">
+        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
-        <span class="text-sm font-semibold">{{ station.hourlyPrice }}€ / heure</span>
+        <span class="text-sm">{{ station.hourlyPrice }}€ / heure</span>
       </div>
 
       <!-- Propriétaire -->
       @if (station.owner) {
-        <div class="flex items-center text-gray-500 text-sm">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-center text-gray-400 text-sm">
+          <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
           </svg>
-          <span>Par {{ station.owner.firstName }} {{ station.owner.lastName }}</span>
+          <span>Par {{ station.owner.firstName }}{{ station.owner.lastName.charAt(0) }}</span>
         </div>
       }
     </div>
 
     <!-- Bouton détails -->
-    <a [routerLink]="['/stations', station.id]" class="block w-full text-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition">
-      Voir les détails
+    <a [routerLink]="['/stations', station.id]" class="block w-full text-center px-4 py-3 bg-primary text-dark font-bold rounded-lg hover:bg-primary-light transition uppercase text-sm">
+      Ajouter une borne
     </a>
   </div>
 </div>
