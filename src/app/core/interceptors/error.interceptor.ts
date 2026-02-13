@@ -31,7 +31,6 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         message: backendMessage ?? error.message,
       });
 
-      // Important : ne pas déconnecter sur /login et /register
       const isPublic = PUBLIC_ENDPOINTS.some((p) => req.url.includes(p));
 
       if (!isPublic && error.status === 401) {
@@ -43,8 +42,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         router.navigate(['/']);
       }
 
-      // On renvoie l'erreur d'origine (HttpErrorResponse) pour que le component
-      // puisse lire error.status et error.error.message
+      // On renvoie l'erreur d'origine (HttpErrorResponse) pour que le component puisse lire error.status et error.error.message
       return throwError(() => error);
     }),
   );

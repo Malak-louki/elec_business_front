@@ -56,7 +56,7 @@ onSubmit(): void {
   }
 
   this.errorMessage = backendMessage || 'Une erreur est survenue. Réessayez.';
-  console.error('❌ Erreur de connexion:', error);
+  console.error('❌ Erreur de connexion:', error?.error?.message || error?.message || 'Unknown error');
 },
 
     complete: () => {
