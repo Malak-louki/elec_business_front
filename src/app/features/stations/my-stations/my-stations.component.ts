@@ -28,7 +28,7 @@ export class MyStationsComponent implements OnInit {
     this.chargingStationService.getMyStations().subscribe({
       next: (stations) => {
         this.myStations = stations;
-        console.log('✅ Mes bornes chargées:', stations);
+
         this.loading = false;
       },
       error: (error) => {
@@ -42,7 +42,6 @@ export class MyStationsComponent implements OnInit {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette borne ?')) {
       this.chargingStationService.deleteStation(stationId).subscribe({
         next: () => {
-          console.log('✅ Borne supprimée');
           this.loadMyStations(); // Recharger la liste
         },
         error: (error) => {
