@@ -21,7 +21,6 @@ export class RegisterComponent {
   errorMessage = '';
   successMessage = '';
 
-  // Accepte : +33XXXXXXXXX ou 0XXXXXXXXX (FR), sans espaces
   private readonly PHONE_FR_REGEX = /^(\+33|0)[1-9](\d{2}){4}$/;
 
   constructor() {
@@ -52,12 +51,6 @@ export class RegisterComponent {
     return null;
   }
 
-  /**
-   * Normalise le téléphone pour que le backend Spring (E.164) accepte :
-   * - "" / espaces -> undefined (champ non envoyé)
-   * - 06/07... -> +336/+337...
-   * - +33... -> inchangé
-   */
   private normalizePhone(input: unknown): string | undefined {
     const raw = String(input ?? '').trim();
     if (!raw) return undefined;
@@ -97,7 +90,7 @@ export class RegisterComponent {
       username: raw.username,
       lastName: raw.lastName,
       password: raw.password,
-      ...(phone ? { phone } : {}) // phone non envoyé si vide
+      ...(phone ? { phone } : {})
     };
 
     this.authService.register(registerData).subscribe({
@@ -120,7 +113,7 @@ export class RegisterComponent {
           error?.message ||
           "Erreur lors de l'inscription";
 
-        console.error("Erreur d'inscription:", error);
+        console.error("Erreur d'inscription:", error?.error?.message || error?.message || 'Unknown error');
       },
       complete: () => {
         this.isLoading = false;
