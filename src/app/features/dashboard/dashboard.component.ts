@@ -55,7 +55,6 @@ export class OwnerDashboardComponent implements OnInit {
       next: (data) => {
         this.stats.set(data);
         this.isLoadingStats.set(false);
-        console.log('📊 Stats loaded:', data);
       },
       error: (error) => {
         console.error('❌ Error loading stats:', error);
@@ -74,7 +73,6 @@ export class OwnerDashboardComponent implements OnInit {
       next: (data) => {
         this.topStations.set(data);
         this.isLoadingStations.set(false);
-        console.log('⚡ Top stations loaded:', data);
       },
       error: (error) => {
         console.error('❌ Error loading stations:', error);
@@ -99,7 +97,6 @@ export class OwnerDashboardComponent implements OnInit {
       next: (data) => {
         this.revenueAnalytics.set(data);
         this.isLoadingRevenue.set(false);
-        console.log('💰 Revenue analytics loaded:', data);
       },
       error: (error) => {
         console.error('❌ Error loading revenue:', error);

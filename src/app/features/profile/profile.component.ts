@@ -24,9 +24,6 @@ export class ProfileComponent implements OnInit {
 
   ngOnInit(): void {
     const user = this.authService.currentUser();
-    console.log('📊 Current user data:', user);
-    console.log('📊 User status (raw):', user?.userStatus);
-    console.log('📊 User status (type):', typeof user?.userStatus);
   }
 
   /**
@@ -55,7 +52,6 @@ export class ProfileComponent implements OnInit {
 
     this.userService.upgradeToOwner().subscribe({
       next: (response) => {
-        console.log('✅ Upgrade successful:', response);
 
         this.successMessage.set(
           'Votre compte a été mis à niveau vers OWNER ! Vous pouvez maintenant ajouter des bornes.',
@@ -149,12 +145,6 @@ export class ProfileComponent implements OnInit {
 
     // Convertir en string et en majuscules pour normaliser
     const normalizedStatus = String(rawStatus).toUpperCase().trim();
-
-    console.log('🔍 Status detection:', {
-      raw: rawStatus,
-      type: typeof rawStatus,
-      normalized: normalizedStatus,
-    });
 
     const labels: { [key: string]: string } = {
       ACTIVE: 'Actif',

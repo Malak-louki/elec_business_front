@@ -137,11 +137,9 @@ export class AddStationComponent {
         : undefined
     };
 
-    console.log('📤 Envoi de la station:', requestDto);
-
     this.chargingStationService.createStation(requestDto).subscribe({
       next: (response) => {
-        console.log('✅ Station créée avec succès:', response);
+
         this.success.set(true);
         this.loading.set(false);
         
